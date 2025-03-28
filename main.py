@@ -222,6 +222,9 @@ class InventoryApp:
         
         # Set up the main frames
         self.setup_frames()
+
+       # Create the inventory view
+        self.create_inventory_view()
         
         # The database connection
         self.db = DatabaseManager()
@@ -259,3 +262,52 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = InventoryApp(root)
     root.mainloop()
+
+    def create_inventory_view(self):
+        # Frame for search
+        search_frame = ttk.Frame(self.content_frame)
+        search_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        ttk.Label(search_frame, text="Search:").pack(side=tk.LEFT, padx=5)
+        
+        self.search_var = tk.StringVar()
+        search_entry = ttk.Entry(search_frame, textvariable=self.search_var, width=30)
+        search_entry.pack(side=tk.LEFT, padx=5)
+        
+        # Create treeview for inventory display
+        self.tree_frame = ttk.Frame(self.content_frame)
+        self.tree_frame.pack(fill=tk.BOTH, expand=True)
+        
+        self.inventory_tree = ttk.Treeview(
+            self.tree_frame,
+            columns=("id", "name", "category", "quantity", "price", "total_value"),
+            show="headings"
+        )
+        
+        # Define columns
+        self.inventory_tree.heading("id", text="ID")
+        self.inventory_tree.heading("name", text="Item Name")
+        self.inventory_tree.heading("category", text="Category")
+        self.inventory_tree.heading("quantity", text="Quantity")
+        self.inventory_tree.heading("price", text="Unit Price (£)")
+        self.inventory_tree.heading("total_value", text="Total Value (£)")
+        
+        # Set column widths
+        self.inventory_tree.column("id", width=50)
+        self.inventory_tree.column("name", width=200)
+        self.inventory_tree.column("category", width=150)
+        self.inventory_tree.column("quantity", width=100)
+        self.inventory_tree.column("price", width=100)
+        self.inventory_tree.column("total_value", width=120)
+        
+        # Add scrollbars
+        y_scrollbar = ttk.Scrollbar(self.tree_frame, orient=tk.VERTICAL, command=self.inventory_tree.yview)
+        self.inventory_tree.configure(yscrollcommand=y_scrollbar.set)
+        
+        x_scrollbar = ttk.Scrollbar(self.tree_frame, orient=tk.HORIZONTAL, command=self.inventory_tree.xview)
+        self.inventory_tree.configure(xscrollcommand=x_scrollbar.set)
+        
+        # Place treeview and scrollbars
+        self.inventory_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        y_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        x_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
