@@ -598,4 +598,4 @@ class ItemDialog:
         self.top.destroy()
 
     def cancel(self):
-        self.top.destroy()
+        self.top.destroy()# Updated with logo code
