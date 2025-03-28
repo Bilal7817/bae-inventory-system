@@ -228,7 +228,10 @@ class InventoryApp:
         
         # The database connection
         self.db = DatabaseManager()
-    
+
+        # Load intial inventory  
+        self.load_inventory()
+
     def setup_frames(self):
         # header frame with BAE Systems branding
         self.header_frame = tk.Frame(self.root, bg="#C8102E")  
@@ -273,6 +276,20 @@ if __name__ == "__main__":
         self.search_var = tk.StringVar()
         search_entry = ttk.Entry(search_frame, textvariable=self.search_var, width=30)
         search_entry.pack(side=tk.LEFT, padx=5)
+
+        # Add search button
+        ttk.Button(
+            search_frame, 
+            text="Search",
+            command=self.search_inventory
+        ).pack(side=tk.LEFT, padx=5)
+
+        # Add clear button
+        ttk.Button(
+            search_frame, 
+            text="Clear",
+            command=self.clear_search
+        ).pack(side=tk.LEFT, padx=5)
         
         # Create treeview for inventory display
         self.tree_frame = ttk.Frame(self.content_frame)
@@ -311,3 +328,49 @@ if __name__ == "__main__":
         self.inventory_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         y_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         x_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
+
+    def search_inventory(self):
+        search_term = self.search_var.get().strip().lower()
+        if not search_term:
+            self.load_inventory()
+            return
+    
+        # Clear existing items
+        for item in self.inventory_tree.get_children():
+            self.inventory_tree.delete(item)
+        
+        # Get search results
+        items = self.db.search_items(search_term)
+        
+        # Insert items into treeview
+        for item in items:
+            total_value = float(item[3]) * float(item[4])
+            self.inventory_tree.insert(
+                "",
+                tk.END,
+                values=(item[0], item[1], item[2], item[3], f"£{item[4]:.2f}", f"£{total_value:.2f}")
+            )
+        
+        self.status_bar.config(text=f"Found {len(items)} items")
+
+    def clear_search(self):
+        self.search_var.set("")
+        self.load_inventory()
+    
+    def load_inventory(self):
+        # Clear existing items
+        for item in self.inventory_tree.get_children():
+            self.inventory_tree.delete(item)
+    
+        items = self.db.get_all_items()
+        
+        # Insert items into treeview
+        for item in items:
+            total_value = float(item[3]) * float(item[4])
+            self.inventory_tree.insert(
+                "",
+                tk.END,
+                values=(item[0], item[1], item[2], item[3], f"£{item[4]:.2f}", f"£{total_value:.2f}")
+            )
+        
+        self.status_bar.config(text=f"Loaded {len(items)} items")
